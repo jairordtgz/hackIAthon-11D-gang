@@ -1,6 +1,8 @@
 import os
 import json
 import time
+import threading
+from http.server import BaseHTTPRequestHandler, HTTPServer
 from dotenv import load_dotenv
 from notion_client import Client
 
@@ -102,7 +104,7 @@ def main():
                 for page in pendientes:
                     page_id = page["id"]
                     
-                    # AQUÍ ESTÁ EL ARREGLO: "Póliza del Paciente" tal cual está en tu Notion
+                    # Extracción a prueba de fallos de Notion
                     informe_list = page["properties"].get("Informe Médico", {}).get("rich_text", [])
                     poliza_list = page["properties"].get("Póliza del Paciente", {}).get("rich_text", [])
                     nombre_list = page["properties"].get("ID Solicitud", {}).get("title", [])
@@ -128,5 +130,27 @@ def main():
             print(f"\n❌ Error en el ciclo: {e}")
             time.sleep(5)
 
+# =================================================================
+# --- INICIO DEL TRUCO PARA DESPLIEGUE GRATIS EN RENDER ---
+# =================================================================
+class DummyHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header('Content-type','text/plain')
+        self.end_headers()
+        self.wfile.write(b"Agente Medico Activo 24/7. El sistema de Notion esta operando en segundo plano.")
+
+def run_dummy_server():
+    # Render asigna dinámicamente un puerto en la variable de entorno PORT.
+    port = int(os.environ.get("PORT", 8000))
+    server = HTTPServer(('0.0.0.0', port), DummyHandler)
+    server.serve_forever()
+
 if __name__ == "__main__":
+    # 1. Arrancar el servidor web fantasma en un hilo paralelo (Background thread)
+    server_thread = threading.Thread(target=run_dummy_server)
+    server_thread.daemon = True
+    server_thread.start()
+    
+    # 2. Arrancar tu agente médico principal
     main()
