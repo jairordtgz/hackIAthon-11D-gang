@@ -63,7 +63,10 @@ def analyze_request(informe_medico, poliza):
     1. ¿El procedimiento está cubierto?
     2. ¿Cumple con los requisitos de carencia?
     
-    Responde ÚNICAMENTE en formato JSON estricto con la siguiente estructura:
+    Responde ÚNICAMENTE en formato JSON estricto.
+    Para el campo "estado", debes usar EXACTAMENTE una de estas tres opciones, respetando mayúsculas: "Aprobado", "Rechazado" o "Pendiente".
+    
+    Estructura esperada:
     {{
         "estado": "Aprobado", 
         "justificacion": "Explicación breve de la decisión."
